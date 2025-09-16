@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Alert, TouchableOpacity, FlatList } from 'react-native';
-import { db } from '../../config/firebase';
-import { collection, addDoc, onSnapshot, doc, getDoc } from 'firebase/firestore';
+
+import { db, auth } from '../../config/firebase';
+import { collection, addDoc, onSnapshot, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import stylesProject from '../../styles/Project';
 
 export default function TaskScreen({ route, navigation }) {
@@ -47,12 +48,15 @@ export default function TaskScreen({ route, navigation }) {
   const addTask = async () => {
     if (newTask.trim()) {
       try {
-        await addDoc(collection(db, 'projects', projectId, 'tasks'), {
-          name: newTask,
-          description: newTaskDescription,
-          status: 'Backlog',
-          image: null,
-          video: null,
+          const safeName = newTask.trim();
+          const safeDesc = newTaskDescription.trim();
+          await addDoc(collection(db, 'projects', projectId, 'tasks'), {
+            name: safeName,
+            description: safeDesc,
+            status: 'Backlog',
+            createdBy: auth.currentUser?.uid,
+            createdAt: serverTimestamp(),
+            media: [], 
         });
         setNewTask('');
         setNewTaskDescription('');
@@ -67,6 +71,7 @@ export default function TaskScreen({ route, navigation }) {
   const renderTask = ({ item }) => (
     <TouchableOpacity
       style={stylesProject.task}
+      testID={`task-card-${item.id}`}
       onPress={() => navigation.navigate('TaskDetails', { task: item, projectId })}
     >
       <Text style={stylesProject.taskText}>{item.name}</Text>
@@ -97,18 +102,20 @@ export default function TaskScreen({ route, navigation }) {
     <View style={stylesProject.taskScreenContainer}>
       <Text style={stylesProject.title}>{projectName}</Text>
       <TextInput
+        testID="new-task-input" 
         placeholder="Nouvelle tâche... (ex: XTO-Add features)"
         value={newTask}
         onChangeText={setNewTask}
         style={stylesProject.input}
       />
       <TextInput
+        testID="new-task-desc-input"
         placeholder="Description de la tâche..."
         value={newTaskDescription}
         onChangeText={setNewTaskDescription}
         style={stylesProject.input}
       />
-      <TouchableOpacity style={stylesProject.button} onPress={addTask}>
+      <TouchableOpacity testID="add-task-btn" style={stylesProject.button} onPress={addTask}>
         <Text style={stylesProject.buttonText}>Ajouter une tâche</Text>
       </TouchableOpacity>
 

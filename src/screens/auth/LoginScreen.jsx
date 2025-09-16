@@ -64,19 +64,21 @@ export default function LoginScreen({ navigation }) {
             style={stylesAuth.image}
           />
           <TextInput
+            testID="email-input"
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
             style={stylesAuth.input}
           />
           <TextInput
+            testID="password-input"
             placeholder="Mot de passe"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
             style={stylesAuth.input}
           />
-          <TouchableOpacity style={stylesAuth.buttonPrimary} onPress={login}>
+          <TouchableOpacity testID="login-button" style={stylesAuth.buttonPrimary} onPress={login}>
             <Text style={stylesAuth.buttonPrimaryText}>Se connecter</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={resetPassword}>

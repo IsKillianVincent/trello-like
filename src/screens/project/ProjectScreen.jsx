@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { View, TextInput, FlatList, Text, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
-import { db } from '../../config/firebase';
-import { collection, addDoc, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import { db, auth } from '../../config/firebase';
+import { collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import stylesProject from '../../styles/Project';
 
 export default function ProjectScreen({ navigation }) {
@@ -17,9 +17,12 @@ export default function ProjectScreen({ navigation }) {
 
   const addProject = async () => {
     if (newProject) {
-      await addDoc(collection(db, 'projects'), 
-      { name: newProject, 
-        columns: ['Backlog', 'À faire', 'En cours', 'Fait'], });
+      await addDoc(collection(db, 'projects'), {
+        name: newProject.trim(),
+        ownerId: auth.currentUser?.uid,
+        columns: ['Backlog','À faire','En cours','Fait'],
+        createdAt: serverTimestamp(),
+      });
       setNewProject('');
     }
   };
@@ -50,12 +53,13 @@ export default function ProjectScreen({ navigation }) {
       <View style={stylesProject.projectScreenContainer}>
         <Text style={stylesProject.title}>Mes projets</Text>
         <TextInput
+          testID="new-project-input"
           placeholder="Nouveau projet"
           value={newProject}
           onChangeText={setNewProject}
           style={stylesProject.input}
         />
-        <TouchableOpacity style={stylesProject.button} onPress={addProject}>
+        <TouchableOpacity testID="add-project-btn" style={stylesProject.button} onPress={addProject}>
           <Text style={stylesProject.buttonText}>Ajouter Projet</Text>
         </TouchableOpacity>
 
